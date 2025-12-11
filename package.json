@@ -2,11 +2,11 @@
   "name": "assignment_2_web_application_course",
   "version": "1.0.0",
   "description": "assigment 2",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "build": "tsc ./src/server.ts",
-    "start": "node --env-file=./.env ./dist/server.js",
-    "dev": "nodemon ./src/server.ts"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },
   "author": "Anael Ben Shabat and Ofir Shviro",
   "license": "ISC",
@@ -22,6 +22,7 @@
     "@types/node": "^25.0.0",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }
 }
