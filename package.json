@@ -4,7 +4,9 @@
   "description": "assigment 2",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc ./src/server.ts",
+    "start": "node --env-file=./.env ./dist/server.js",
+    "dev": "nodemon ./src/server.ts"
   },
   "author": "Anael Ben Shabat and Ofir Shviro",
   "license": "ISC",
@@ -15,6 +17,11 @@
     "mongoose": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@types/express": "^5.0.6",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^25.0.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
