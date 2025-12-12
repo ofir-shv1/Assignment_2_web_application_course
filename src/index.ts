@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import postRoutes from './routes/postRoutes';
 import commentRoute from './routes/commentRoute';
+import userRoutes from './routes/userRoute';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoute);
+app.use('/users', userRoutes);
 
 const mongoUri = process.env.DB_URI || '';
 
