@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import postRoutes from './routes/postRoutes';
 import commentRoute from './routes/commentRoute';
 import userRoutes from './routes/userRoute';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const app = express();
 
 app.use(express.json());
 
+app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoute);
 app.use('/users', userRoutes);
