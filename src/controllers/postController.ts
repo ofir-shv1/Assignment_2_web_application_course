@@ -54,3 +54,18 @@ export const updatePostById = async (req: Request, res: Response): Promise<void>
         res.status(500).json({ message: error.message });
     }
 };
+
+// delete a post by ID
+export const deletePostById = async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+    try {
+        const deletedPost = await postModal.findByIdAndDelete(id);
+        if (!deletedPost) {
+            res.status(404).json({ message: 'Post not found' });
+            return;
+        }
+        res.status(200).json({ message: 'Post deleted successfully' });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};

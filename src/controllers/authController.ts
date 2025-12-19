@@ -12,7 +12,12 @@ const generateTokens = (userId: string): { accessToken: string; refreshToken: st
     const refreshExpiresIn = parseInt(process.env.JWT_REFRESH_EXPIRATION || '604800');
     
     const accessToken = jwt.sign({ id: userId }, secret, { expiresIn: accessExpiresIn });
-    const refreshToken = jwt.sign({ id: userId }, refreshSecret, { expiresIn: refreshExpiresIn });
+    // Add a unique identifier (jti - JWT ID claim) to ensure refresh tokens are unique
+    const refreshToken = jwt.sign(
+      { id: userId, jti: Math.random().toString(36) + Date.now().toString(36) }, 
+      refreshSecret, 
+      { expiresIn: refreshExpiresIn }
+    );
     
     return { accessToken, refreshToken };
 };
@@ -64,6 +69,10 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -78,6 +87,10 @@ export const login = async (req: Request, res: Response) => {
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
+    
+    // Delete old refresh tokens for this user to avoid duplicates
+    await RefreshToken.deleteMany({ userId: user._id });
+    
     await RefreshToken.create({
       userId: user._id,
       token: refreshToken,
@@ -105,22 +118,32 @@ export const refreshToken = async (req: Request, res: Response) => {
     }
 
     const refreshSecret = process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_key';
+    
+    // Verify JWT signature first
     const decoded = jwt.verify(refreshToken, refreshSecret) as { id: string };
 
+    // Check if token exists in database
     const tokenDoc = await RefreshToken.findOne({ token: refreshToken, userId: decoded.id });
     if (!tokenDoc) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
 
-    const secret = process.env.JWT_SECRET || 'default_secret_key';
-    const accessExpiresIn = parseInt(process.env.JWT_ACCESS_EXPIRATION || '3600');
-    const accessToken = jwt.sign(
-      { id: decoded.id },
-      secret,
-      { expiresIn: accessExpiresIn }
-    );
+    // Delete the old refresh token (invalidate after use)
+    await RefreshToken.deleteOne({ token: refreshToken });
 
-    res.status(200).json({ accessToken });
+    // Generate new tokens
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens(decoded.id);
+
+    // Store the new refresh token
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    await RefreshToken.create({
+      userId: decoded.id,
+      token: newRefreshToken,
+      expiresAt
+    });
+
+    res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   } catch (error) {
     res.status(403).json({ message: 'Invalid or expired refresh token' });
   }
