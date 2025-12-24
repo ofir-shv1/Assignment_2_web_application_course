@@ -59,9 +59,14 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
   try {
     const { username, email, password } = req.body;
 
+    const updateData: any = {};
+    if (username) updateData.username = username;
+    if (email) updateData.email = email;
+    if (password) updateData.password = password;
+
     const user = await userModel.findByIdAndUpdate(
       req.params.id,
-      { username, email, password },
+      updateData,
       { new: true, runValidators: true }
     );
 

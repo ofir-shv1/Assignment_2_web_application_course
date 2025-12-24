@@ -37,4 +37,9 @@ export const connectDB = async (): Promise<void> => {
     }
 };
 
-export default app;
+const initApp = async () => {
+    await connectDB();
+    return app;
+};
+
+export default initApp;
