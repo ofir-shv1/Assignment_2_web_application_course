@@ -41,12 +41,12 @@ export const getLoggedInUser = async (app: Express): Promise<UserData> => {
     return loggedUser;
 };
 
-export type PostData = { title: string; content: string; sender: string; _id?: string };
+export type PostData = { title: string; content: string; sender?: string; _id?: string };
 
-export const postsList: PostData[] = [
-    { title: "First Post", content: "This is the first post content", sender: "testuser" },
-    { title: "Second Post", content: "This is the second post content", sender: "testuser" },
-    { title: "Third Post", content: "This is the third post content", sender: "testuser" },
+export const getPostsList = (userId: string): PostData[] => [
+    { title: "First Post", content: "This is the first post content", sender: userId },
+    { title: "Second Post", content: "This is the second post content", sender: userId },
+    { title: "Third Post", content: "This is the third post content", sender: userId },
 ];
 
 export type CommentData = { postId: string; content: string; sender: string; _id?: string };

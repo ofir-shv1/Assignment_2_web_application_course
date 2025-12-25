@@ -2,7 +2,7 @@ import request from "supertest";
 import initApp from "../index";
 import { Express } from "express";
 import User from "../models/userModel";
-import { userData, postsList } from "./utils";
+import { userData } from "./utils";
 
 let app: Express;
 
@@ -17,13 +17,13 @@ afterAll((done) => {
 
 describe("Test Auth Suite", () => {
   test("Test post a post without token fails", async () => {
-    const postData = postsList[0];
+    const postData = { title: "Test Post", content: "Test content" };
     const response = await request(app).post("/posts").send(postData);
     expect(response.status).toBe(401);
   });
 
   test("Test post with malformed authorization header", async () => {
-    const postData = postsList[0];
+    const postData = { title: "Test Post", content: "Test content" };
     const response = await request(app).post("/posts")
       .set("Authorization", "InvalidFormat")
       .send(postData);
@@ -52,7 +52,7 @@ describe("Test Auth Suite", () => {
   });
 
   test("Create a post with token succeeds", async () => {
-    const postData = postsList[0];
+    const postData = { title: "Test Post", content: "Test content" };
     const response = await request(app)
       .post("/posts")
       .set("Authorization", "Bearer " + userData.accessToken)
@@ -61,7 +61,7 @@ describe("Test Auth Suite", () => {
   });
 
   test("Create a post with compromised token fails", async () => {
-    const postData = postsList[0];
+    const postData = { title: "Test Post", content: "Test content" };
     const compromisedToken = userData.accessToken + "a";
     const response = await request(app)
       .post("/posts")
@@ -88,7 +88,7 @@ describe("Test Auth Suite", () => {
   test("Test using token after expiration fails", async () => {
     // Sleep for 4 seconds to let the token expire (JWT_EXPIRATION=3)
     await new Promise((r) => setTimeout(r, 4000));
-    const postData = postsList[0];
+    const postData = { title: "Test Post", content: "Test content" };
     const response = await request(app)
       .post("/posts")
       .set("Authorization", "Bearer " + userData.accessToken)
@@ -107,10 +107,11 @@ describe("Test Auth Suite", () => {
     userData.refreshToken = refreshResponse.body.refreshToken;
 
     // Try to create post again
+    const postData2 = { title: "Test Post", content: "Test content" };
     const retryResponse = await request(app)
       .post("/posts")
       .set("Authorization", "Bearer " + userData.accessToken)
-      .send(postData);
+      .send(postData2);
     expect(retryResponse.status).toBe(201);
   });
 
@@ -173,4 +174,26 @@ describe("Test Auth Suite", () => {
     expect(response.status).toBe(401);
     expect(response.body.message).toBe('Invalid credentials');
   });
+
+  test("Login without email", async () => {
+    const response = await request(app).post("/auth/login")
+      .send({ password: "password" });
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Email and password are required');
+  });
+
+  test("Login without password", async () => {
+    const response = await request(app).post("/auth/login")
+      .send({ email: "test@test.com" });
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Email and password are required');
+  });
+
+  test("Refresh without refresh token", async () => {
+    const response = await request(app).post("/auth/refresh")
+      .send({});
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe('Refresh token required');
+  });
 });
+

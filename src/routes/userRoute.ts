@@ -1,4 +1,4 @@
-import { createUser, getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/userController';
+import { getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/userController';
 import { Router } from 'express';
 import { verifyToken } from '../middleware/authMiddleware';
 
@@ -65,50 +65,6 @@ router.get('/', verifyToken, getAllUsers);
  *         description: Server error
  */
 router.get('/:id', verifyToken, getUserById);
-
-/**
- * @swagger
- * /users:
- *   post:
- *     summary: Create a new user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - username
- *               - email
- *               - password
- *             properties:
- *               username:
- *                 type: string
- *                 example: jane_doe
- *               email:
- *                 type: string
- *                 example: jane@example.com
- *               password:
- *                 type: string
- *                 example: securePassword123
- *     responses:
- *       201:
- *         description: User created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       400:
- *         description: User already exists or validation error
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-router.post('/', verifyToken, createUser);
 
 /**
  * @swagger

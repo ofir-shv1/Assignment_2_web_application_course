@@ -89,7 +89,6 @@ router.get('/:id', verifyToken, postController.getPostById);
  *             required:
  *               - title
  *               - content
- *               - sender
  *             properties:
  *               title:
  *                 type: string
@@ -97,12 +96,9 @@ router.get('/:id', verifyToken, postController.getPostById);
  *               content:
  *                 type: string
  *                 example: This is the content of my post
- *               sender:
- *                 type: string
- *                 example: john_doe
  *     responses:
  *       201:
- *         description: Post created successfully
+ *         description: Post created successfully (sender is automatically set from authenticated user)
  *         content:
  *           application/json:
  *             schema:
