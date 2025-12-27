@@ -3,7 +3,7 @@ import mongoose, { Document } from 'mongoose';
 export interface IPost extends Document {
   title: string;
   content: string;
-  sender: string;
+  sender: mongoose.Schema.Types.ObjectId;
   comments: mongoose.Schema.Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
@@ -12,7 +12,7 @@ export interface IPost extends Document {
 export interface IComment extends Document {
   postId: mongoose.Schema.Types.ObjectId;
   content: string;
-  sender: string;
+  sender: mongoose.Schema.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }

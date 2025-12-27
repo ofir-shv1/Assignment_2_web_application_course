@@ -21,8 +21,7 @@ beforeAll(async () => {
     .set("Authorization", "Bearer " + loginUser.accessToken)
     .send({
       title: "Test Post for Comments",
-      content: "This post is for testing comments",
-      sender: loginUser.username
+      content: "This post is for testing comments"
     });
   postId = postResponse.body._id;
   
@@ -48,7 +47,7 @@ describe("Comments Test Suite", () => {
     for (const comment of commentsList) {
       const response = await request(app).post("/comments/" + comment.postId)
         .set("Authorization", "Bearer " + loginUser.accessToken)
-        .send({ content: comment.content, sender: comment.sender });
+        .send({ content: comment.content });
       expect(response.status).toBe(201);
       expect(response.body.content).toBe(comment.content);
       expect(response.body.postId).toBe(comment.postId);
@@ -150,5 +149,69 @@ describe("Comments Test Suite", () => {
       .send({ content: "updated content" });
     expect(response.status).toBe(404);
     expect(response.body.message).toBe('Comment not found');
+  });
+
+  test("Create comment without content", async () => {
+    const response = await request(app)
+      .post("/comments/" + postId)
+      .set("Authorization", "Bearer " + loginUser.accessToken)
+      .send({});
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Content is required');
+  });
+
+  test("Update comment - unauthorized (different user)", async () => {
+    // Create a new user
+    const randomId = Date.now();
+    const newUser = {
+      email: `commentuser${randomId}@test.com`,
+      username: `commentuser${randomId}`,
+      password: "testpass"
+    };
+    const registerResponse = await request(app).post("/auth/register").send(newUser);
+    const otherUserToken = registerResponse.body.accessToken;
+
+    // Create a comment with the other user
+    const commentData = { content: "Other user's comment" };
+    const createResponse = await request(app)
+      .post("/comments/" + postId)
+      .set("Authorization", "Bearer " + otherUserToken)
+      .send(commentData);
+    const otherCommentId = createResponse.body._id;
+
+    // Try to update the comment with the original user (should fail)
+    const updateResponse = await request(app)
+      .put("/comments/" + otherCommentId)
+      .set("Authorization", "Bearer " + loginUser.accessToken)
+      .send({ content: "Hacked comment" });
+    expect(updateResponse.status).toBe(403);
+    expect(updateResponse.body.message).toBe('Not authorized to update this comment');
+  });
+
+  test("Delete comment - unauthorized (different user)", async () => {
+    // Create a new user
+    const randomId = Date.now();
+    const newUser = {
+      email: `commentuser2${randomId}@test.com`,
+      username: `commentuser2${randomId}`,
+      password: "testpass"
+    };
+    const registerResponse = await request(app).post("/auth/register").send(newUser);
+    const otherUserToken = registerResponse.body.accessToken;
+
+    // Create a comment with the other user
+    const commentData = { content: "Other user's comment 2" };
+    const createResponse = await request(app)
+      .post("/comments/" + postId)
+      .set("Authorization", "Bearer " + otherUserToken)
+      .send(commentData);
+    const otherCommentId = createResponse.body._id;
+
+    // Try to delete the comment with the original user (should fail)
+    const deleteResponse = await request(app)
+      .delete("/comments/" + otherCommentId)
+      .set("Authorization", "Bearer " + loginUser.accessToken);
+    expect(deleteResponse.status).toBe(403);
+    expect(deleteResponse.body.message).toBe('Not authorized to delete this comment');
   });
 });

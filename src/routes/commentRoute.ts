@@ -95,23 +95,21 @@ router.get('/:id', verifyToken, commentController.getCommentById);
  *             type: object
  *             required:
  *               - content
- *               - sender
  *             properties:
  *               content:
  *                 type: string
  *                 example: Great post!
- *               sender:
- *                 type: string
- *                 example: jane_doe
  *     responses:
  *       201:
- *         description: Comment created successfully
+ *         description: Comment created successfully (sender is automatically set from authenticated user)
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Comment'
  *       400:
  *         description: Validation error
+ *       404:
+ *         description: Post not found
  *       401:
  *         description: Unauthorized
  *       500:

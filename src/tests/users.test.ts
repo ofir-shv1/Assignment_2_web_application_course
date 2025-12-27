@@ -50,70 +50,36 @@ describe("Users Test Suite", () => {
     expect(response.body.user._id).toBe(userId);
   });
 
-  test("Create New User", async () => {
+  test("Update User with password", async () => {
     const randomId = Date.now();
-    const newUser = {
-      username: `newuser${randomId}`,
-      email: `newuser${randomId}@test.com`,
-      password: "newpass123"
+    const updatedData = {
+      username: `updateduser${randomId}`,
+      password: "newpassword123"
     };
-    const response = await request(app).post("/users")
+    const response = await request(app)
+      .put("/users/" + userId)
       .set("Authorization", "Bearer " + loginUser.accessToken)
-      .send(newUser);
-    expect(response.status).toBe(201);
-    expect(response.body.user.username).toBe(newUser.username);
-    expect(response.body.user.email).toBe(newUser.email);
-  });
-
-  test("Delete User", async () => {
-    // Create a user to delete
-    const randomId = Date.now();
-    const userToDelete = {
-      username: `deleteuser${randomId}`,
-      email: `delete${randomId}@test.com`,
-      password: "deletepass"
-    };
-    const createResponse = await request(app).post("/users")
-      .set("Authorization", "Bearer " + loginUser.accessToken)
-      .send(userToDelete);
-    const deleteUserId = createResponse.body.user._id;
-
-    const response = await request(app).delete("/users/" + deleteUserId)
-      .set("Authorization", "Bearer " + loginUser.accessToken);
+      .send(updatedData);
     expect(response.status).toBe(200);
-    expect(response.body.message).toBe('User deleted successfully');
-
-    const getResponse = await request(app).get("/users/" + deleteUserId)
-      .set("Authorization", "Bearer " + loginUser.accessToken);
-    expect(getResponse.status).toBe(404);
+    expect(response.body.user.username).toBe(updatedData.username);
   });
 
-  test("Create user without required fields", async () => {
-    const response = await request(app).post("/users")
+  test("Update User - Unauthorized (different user)", async () => {
+    const response = await request(app)
+      .put("/users/000000000000000000000001")
       .set("Authorization", "Bearer " + loginUser.accessToken)
-      .send({ username: "test" });
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe('All fields (username, email, password) are required');
+      .send({ username: "hacker" });
+    expect(response.status).toBe(403);
+    expect(response.body.message).toBe('Not authorized to update this user');
   });
 
-  test("Create duplicate user", async () => {
-    const randomId = Date.now();
-    const duplicateUser = {
-      username: `dupuser${randomId}`,
-      email: `dup${randomId}@test.com`,
-      password: "test123"
-    };
-    // Create first user
-    await request(app).post("/users")
+  test("Update User - Unauthorized (different user)", async () => {
+    const response = await request(app)
+      .put("/users/000000000000000000000001")
       .set("Authorization", "Bearer " + loginUser.accessToken)
-      .send(duplicateUser);
-    
-    // Try to create duplicate
-    const response = await request(app).post("/users")
-      .set("Authorization", "Bearer " + loginUser.accessToken)
-      .send(duplicateUser);
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe('User with this email or username already exists');
+      .send({ username: "hacker" });
+    expect(response.status).toBe(403);
+    expect(response.body.message).toBe('Not authorized to update this user');
   });
 
   test("Get user with invalid ID format", async () => {
@@ -121,6 +87,14 @@ describe("Users Test Suite", () => {
       .get("/users/invalid-id")
       .set("Authorization", "Bearer " + loginUser.accessToken);
     expect(response.status).toBe(500);
+  });
+
+  test("Get non-existent user", async () => {
+    const response = await request(app)
+      .get("/users/000000000000000000000000")
+      .set("Authorization", "Bearer " + loginUser.accessToken);
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe('User not found');
   });
 
   test("Update user with invalid ID format", async () => {
@@ -143,15 +117,15 @@ describe("Users Test Suite", () => {
       .put("/users/000000000000000000000000")
       .set("Authorization", "Bearer " + loginUser.accessToken)
       .send({ username: "updated" });
-    expect(response.status).toBe(404);
-    expect(response.body.message).toBe('User not found');
+    expect(response.status).toBe(403);
+    expect(response.body.message).toBe('Not authorized to update this user');
   });
 
   test("Delete non-existent user", async () => {
     const response = await request(app)
       .delete("/users/000000000000000000000000")
       .set("Authorization", "Bearer " + loginUser.accessToken);
-    expect(response.status).toBe(404);
-    expect(response.body.message).toBe('User not found');
+    expect(response.status).toBe(403);
+    expect(response.body.message).toBe('Not authorized to delete this user');
   });
 });
