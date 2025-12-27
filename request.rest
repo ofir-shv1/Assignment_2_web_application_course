@@ -1,0 +1,281 @@
+### ========================================
+### AUTHENTICATION ROUTES
+### ========================================
+
+### 1. Register New User
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "john123",
+  "email": "john123@example.com",
+  "password": "123456"
+}
+
+###
+
+### 2. Register Second User
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "jane_smith",
+  "email": "jane@example.com",
+  "password": "password456"
+}
+
+###
+
+### 3. Login User (john_doe)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+###
+
+### 4. Login User (jane_smith)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "ofirShviro@example.com",
+  "password": "123456"
+}
+
+###
+
+### 5. Refresh Access Token
+POST http://localhost:3000/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZhYzJkOWZjNDcwZWFjMjY4NzkyNiIsImp0aSI6IjAucTZsajNienFvMmNtam80Zmc2MCIsImlhdCI6MTc2NjgyOTEwMSwiZXhwIjoxNzY3NDMzOTAxfQ.Gdo79ypbIEK6Dqm0qHnI-FAXsGHSEePdAzQts2DTwYY"
+}
+
+###
+
+### 6. Logout User
+POST http://localhost:3000/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZhNjk1ZDY2NTIxNjk1OGQ0MGJhNCIsImp0aSI6IjAucGZ5M24wa3lybm1qbzQ5NDMyIiwiaWF0IjoxNzY2ODI4ODA2LCJleHAiOjE3Njc0MzM2MDZ9.NEYRvn3I5GHyATSOJXqBdLBdKiu3Btl_eraicu8Auqg"
+}
+
+###
+
+### ========================================
+### POST ROUTES (Requires Authentication)
+### ========================================
+
+### 7. Create New Post
+POST http://localhost:3000/posts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZiMWFhMjhiYzgyODdjZjc2M2U2YiIsImlhdCI6MTc2NjgzMDUwNiwiZXhwIjoxNzY2ODM0MTA2fQ.cuklat2O-Szej8qc3v1_CpjeqXh2iIO1fzaMCGUIRuE
+
+{
+  "title": "My First Post",
+  "content": "This is the content of my first post about web development"
+}
+
+###
+
+### 8. Create Second Post
+POST http://localhost:3000/posts
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+{
+  "title": "Introduction to TypeScript",
+  "content": "TypeScript is a strongly typed programming language that builds on JavaScript"
+}
+
+###
+
+### 9. Create Third Post
+POST http://localhost:3000/posts
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+{
+  "title": "Understanding REST APIs",
+  "content": "REST APIs are a fundamental part of modern web development"
+}
+
+###
+
+### 10. Get All Posts
+GET http://localhost:3000/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZiMWFhMjhiYzgyODdjZjc2M2U2YiIsImlhdCI6MTc2NjgzMDUwNiwiZXhwIjoxNzY2ODM0MTA2fQ.cuklat2O-Szej8qc3v1_CpjeqXh2iIO1fzaMCGUIRuE
+
+###
+
+### 11. Get Posts by Sender (Filter)
+GET http://localhost:3000/posts?sender=john_doe
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 12. Get Post by ID
+GET http://localhost:3000/posts/POST_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 13. Update Post by ID
+PUT http://localhost:3000/posts/POST_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+{
+  "title": "My Updated Post Title",
+  "content": "Updated content with more information",
+}
+
+###
+
+### ========================================
+### COMMENT ROUTES (Requires Authentication)
+### ========================================
+
+### 14. Create Comment on Post
+POST http://localhost:3000/comments/694faf90214808eb8385434c
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZhZjYxMjE0ODA4ZWI4Mzg1NDM0OCIsImlhdCI6MTc2NjgyOTkyMSwiZXhwIjoxNzY2ODMzNTIxfQ.B6kwqIUJtg1sUcN60wvlONhqDn7heE0PRtI47mRyn98
+
+{
+  "content": "Great post! Very informative.",
+}
+
+###
+
+### 15. Create Another Comment
+POST http://localhost:3000/comments/POST_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+{
+  "content": "Thanks for sharing this!",
+}
+
+###
+
+### 16. Get All Comments
+GET http://localhost:3000/comments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZhZjYxMjE0ODA4ZWI4Mzg1NDM0OCIsImlhdCI6MTc2NjgyOTkyMSwiZXhwIjoxNzY2ODMzNTIxfQ.B6kwqIUJtg1sUcN60wvlONhqDn7heE0PRtI47mRyn98
+
+###
+
+### 17. Get Comments by Post ID (Filter)
+GET http://localhost:3000/comments?postId=POST_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 18. Get Comment by ID
+GET http://localhost:3000/comments/COMMENT_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 19. Update Comment by ID
+PUT http://localhost:3000/comments/COMMENT_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+{
+  "content": "Updated comment text",
+}
+
+###
+
+### 20. Delete Comment by ID
+DELETE http://localhost:3000/comments/COMMENT_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### ========================================
+### USER ROUTES (Requires Authentication)
+### ========================================
+
+### 21. Get All Users
+GET http://localhost:3000/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZhZjYxMjE0ODA4ZWI4Mzg1NDM0OCIsImlhdCI6MTc2NjgyOTkyMSwiZXhwIjoxNzY2ODMzNTIxfQ.B6kwqIUJtg1sUcN60wvlONhqDn7heE0PRtI47mRyn98
+
+###
+
+### 22. Get User by ID
+GET http://localhost:3000/users/USER_ID_HERE
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### 23. Create New User
+POST http://localhost:3000/users
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+{
+  "username": "alice_jones",
+  "email": "alice@example.com",
+  "password": "password789"
+}
+
+###
+
+### 24. Update User by ID
+PUT http://localhost:3000/users/USER_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+{
+  "username": "alice_updated",
+  "email": "alice.updated@example.com",
+  "password": "newpassword789"
+}
+
+###
+
+### 25. Delete User by ID
+DELETE http://localhost:3000/users/694fb1aa28bc8287cf763e6b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGZiMWFhMjhiYzgyODdjZjc2M2U2YiIsImlhdCI6MTc2NjgzMDUwNiwiZXhwIjoxNzY2ODM0MTA2fQ.cuklat2O-Szej8qc3v1_CpjeqXh2iIO1fzaMCGUIRuE
+
+###
+
+### ========================================
+### API DOCUMENTATION
+### ========================================
+
+### 26. Get Swagger UI (Open in Browser)
+# http://localhost:3000/api-docs
+
+### 27. Get Swagger JSON Specification
+GET http://localhost:3000/api-docs.json
+
+###
+
+### ========================================
+### TESTING WORKFLOW EXAMPLE
+### ========================================
+### 
+### Step-by-Step Guide:
+### 
+### 1. Register a user (Request #1)
+### 2. Login with that user (Request #3)
+### 3. Copy the accessToken and refreshToken from the response
+### 4. Replace YOUR_ACCESS_TOKEN_HERE with the accessToken in all protected routes
+### 5. Create posts (Requests #7, #8, #9)
+### 6. Get all posts (Request #10)
+### 7. Copy a post ID from the response
+### 8. Replace POST_ID_HERE with the actual post ID
+### 9. Create comments on that post (Requests #14, #15)
+### 10. Get all comments (Request #16)
+### 11. Test update and delete operations
+### 12. When token expires, use refresh endpoint (Request #5)
+### 
+### ========================================

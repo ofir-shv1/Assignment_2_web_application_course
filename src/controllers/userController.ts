@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
 import bcrypt from 'bcrypt';
 import userModel from '../models/userModel';
+import postModel from '../models/postModel';
+import commentModel from '../models/commentModel';
+import RefreshToken from '../models/refreshTokenModel';
 import mongoose from 'mongoose';
 
 // Get all users
@@ -93,14 +96,41 @@ export const deleteUser = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    const user = await userModel.findByIdAndDelete(req.params.id);
+    const user = await userModel.findById(req.params.id);
 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
     }
 
-    res.json({ message: 'User deleted successfully' });
+    // Cascade delete: Remove all related data
+    
+    // 1. Delete all posts created by this user
+    const userPosts = await postModel.find({ sender: req.params.id } as any);
+    const postIds = userPosts.map(post => post._id);
+    
+    // 2. Delete all comments on those posts
+    if (postIds.length > 0) {
+      await commentModel.deleteMany({ postId: { $in: postIds } } as any);
+    }
+    
+    // 3. Delete all comments created by this user (on other posts)
+    await commentModel.deleteMany({ sender: req.params.id } as any);
+    
+    // 4. Delete all posts created by this user
+    await postModel.deleteMany({ sender: req.params.id } as any);
+    
+    // 5. Delete all refresh tokens for this user
+    await RefreshToken.deleteMany({ userId: req.params.id });
+    
+    // 6. Finally, delete the user
+    await userModel.findByIdAndDelete(req.params.id);
+
+    res.json({ 
+      message: 'User and all related data deleted successfully',
+      deletedPosts: postIds.length,
+      deletedUser: user.username
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
   }
